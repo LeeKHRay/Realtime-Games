@@ -1,0 +1,22 @@
+﻿.name {
+    max-width: 135px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+tr {
+    background-color: var(--bg-color, initial);
+}
+
+tr.bg-gold {
+    --bg-color: #ffd700;
+}
+
+tr.bg-silver {
+    --bg-color: #dbe4eb;
+}
+
+tr.bg-bronze {
+    --bg-color: #cd7f32;
+}

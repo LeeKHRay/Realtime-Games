@@ -1,0 +1,70 @@
+﻿.player-status-row {
+    --outer-bg-blue: rgb(19, 54, 255);
+    --outer-bg-red: rgb(238, 23, 23);
+}
+
+.player-status {
+    height: 75px;
+    overflow: hidden;
+}
+
+.player-status-item {
+    margin: 5px;
+    font-size: 18px;
+    display: grid;
+    place-items: center;
+}
+
+.outer-blue {
+    background-color: var(--outer-bg-blue);
+}
+
+.inner-blue {
+    background-color: var(--player-blue);
+}
+
+.outer-red {
+    background-color: var(--outer-bg-red);
+}
+
+.inner-red {
+    background-color: var(--player-red);
+}
+
+.name {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.divider-blue {
+    width: 1px;
+    background: var(--outer-bg-blue);
+    padding: 0;
+    margin: 5px 0;
+}
+
+.divider-red {
+    width: 1px;
+    background: var(--outer-bg-red);
+    padding: 0;
+    margin: 5px 0;
+}
+
+@property --angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
+.player-turn {
+    background-image: conic-gradient(from calc(var(--angle)), transparent 260deg, rgb(36, 245, 63) 360deg);
+    animation: rotate 2s infinite linear;
+}
+
+@keyframes rotate {
+    100% {
+        --angle: 360deg;
+    }
+}

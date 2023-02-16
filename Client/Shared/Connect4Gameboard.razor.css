@@ -1,0 +1,20 @@
+﻿.cell, .cell.gray {
+    --bg-color: var(--gray);
+    width: 70px;
+    height: 70px;
+    border-radius: 100%;
+    background-color: var(--bg-color);
+    caret-color: transparent; /* hide caret | in div */
+}
+
+.cell-clickable {
+    cursor: pointer;
+}
+
+.cell.blue {
+    --bg-color: var(--player-blue);
+}
+
+.cell.red {
+    --bg-color: var(--player-red);
+}

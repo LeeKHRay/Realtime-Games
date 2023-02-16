@@ -1,0 +1,52 @@
+﻿@inject HttpClient HttpClient
+@inject NavigationManager Navigation
+@inject IPlayerState PlayerState
+
+@if (Players != null && Players.Count > 0 && PlayerState.Player != null)
+{
+    <hr />
+    <h3 class="text-center">Leaderboard</h3>
+    <table class="table table-bordered border-dark">
+        <thead>
+            <tr class="bg-dark text-light">
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Players.Count; i++)
+            {
+                string rowColor = i switch
+                {
+                    0 => "gold",
+                    1 => "silver",
+                    2 => "bronze",
+                    _ => "light"
+                };
+
+                @foreach (var player in Players[i])
+                {
+                    string textColor = PlayerState.Player.Name == player.Name ? "text-success" : "";
+                    <tr class="bg-@rowColor">
+                        <td>@(i + 1)</td>
+                        <td class="name @textColor">@player.Name</td>
+                        <td class="@textColor">@player.Score[GameName]</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    public List<List<Player>>? Players { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string GameName { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Players = await HttpClient.GetFromJsonAsync<List<List<Player>>>($"{Navigation.BaseUri}api/users/rankings?gameName={GameName}");
+    }
+}

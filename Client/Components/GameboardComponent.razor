@@ -1,0 +1,39 @@
+﻿@typeparam TCell where TCell : Cell<TCellState>
+@typeparam TCellState where TCellState : Enum
+
+<table class="@BoardStyle">
+    <thead>
+        @Header
+    </thead>
+    <tbody>
+        @for (int row = 0; row < Row; row++)
+        {
+            <tr>
+                @for (int col = 0; col < Col; col++)
+                {
+                    @Cell(Grid[row, col])
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter, EditorRequired]
+    public required TCell[,] Grid { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<TCell> Cell { get; set; }
+
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    [Parameter, EditorRequired]
+    public required int Row { get; set; }
+
+    [Parameter, EditorRequired]
+    public required int Col { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string BoardStyle { get; set; }
+}

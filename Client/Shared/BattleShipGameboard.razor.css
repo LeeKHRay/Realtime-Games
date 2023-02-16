@@ -1,0 +1,65 @@
+﻿.cell {
+    width: 35px;
+    height: 35px;
+    background: var(--ship-color, transparent);
+    text-align: center;
+    caret-color: transparent; /* hide caret | in div */
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    margin: 0 auto;
+    caret-color: transparent; /* hide caret | in div */
+}
+
+.cell-clickable {
+    cursor: pointer;
+}
+
+.ship {
+    border-radius: 25%;
+}
+
+.ship1 {
+    --ship-color: #0af7f0;
+}
+
+.ship2 {
+    --ship-color: #baf242;
+}
+
+.ship3 {
+    --ship-color: #db9572;
+}
+
+.ship4 {
+    --ship-color: #fff586;
+}
+
+.ship5 {
+    --ship-color: #8000ff;
+}
+
+.destroyed {
+    font-size: 1.3rem;
+    color: black;
+}
+
+.damaged {
+    font-size: 1.3rem;
+    color: red;
+}
+
+.blue {
+    background-color: var(--player-blue);
+}
+
+.red {
+    background-color: var(--player-red);
+}
+
+.gray {
+    background-color: var(--gray);
+}

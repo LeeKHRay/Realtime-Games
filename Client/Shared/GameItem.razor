@@ -1,0 +1,14 @@
+﻿<div class="card border border-5 border-dark">
+    <NavLink href="@($"games/{Link}")"><img src="@($"img/{Link}.png")" width="250" height="250" alt="@GameName" /></NavLink>
+    <div class="card-body bg-dark p-1">
+        <h1 class="card-title text-center"><NavLink class="text-decoration-none text-light" href="@($"games/{Link}")">@GameName</NavLink></h1>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required string GameName { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string Link { get; set; }
+}

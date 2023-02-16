@@ -1,0 +1,54 @@
+﻿@inject IPlayerState PlayerState
+
+<div class="container-fluid">
+    <div class="row mb-3 player-status-row">
+        @{
+            string outerBgColor = $"outer-{GameState.PlayerColor}";
+            string innerBgColor = $"inner-{GameState.PlayerColor}";
+            string dividerColor = $"divider-{GameState.PlayerColor}";
+            string playerTurn = GameState.IsPlayerTurn ? "player-turn" : "";
+        }
+        <div class="col @outerBgColor me-3">
+            <div class="row @playerTurn">
+                <div class="col">
+                    <div row class="row player-status">
+                        <div class="col player-status-item @innerBgColor me-0">
+                            <span class="name">@PlayerState.Player.Name</span>
+                        </div>
+                        <div class="col-auto @dividerColor"></div>
+                        <div class="col-auto player-status-item @innerBgColor ms-0">
+                            @PlayerState.Player.Score[GameState.GameName]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @{
+            outerBgColor = $"outer-{GameState.OpponentColor}";
+            innerBgColor = $"inner-{GameState.OpponentColor}";
+            dividerColor = $"divider-{GameState.OpponentColor}";
+            string opponentTurn = GameState.IsPlayerTurn ? "" : "player-turn";
+        }
+        <div class="col @outerBgColor ms-3">
+            <div class="row @opponentTurn">
+                <div class="col">
+                    <div row class="row player-status">
+                        <div class="col-auto player-status-item @innerBgColor me-0">
+                            @PlayerState.Opponent!.Score[GameState.GameName]
+                        </div>
+                        <div class="col-auto @dividerColor"></div>
+                        <div class="col player-status-item @innerBgColor ms-0">
+                            <span class="name">@PlayerState.Opponent!.Name</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required IGameState GameState { get; set; } = default!;
+}

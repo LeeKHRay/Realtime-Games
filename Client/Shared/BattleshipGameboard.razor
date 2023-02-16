@@ -1,0 +1,67 @@
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IBattleshipGameState GameState
+
+<div class="container">
+    <div class="row justify-content-center mt-2">
+        <div class="col mx-3">
+            <GameboardComponent TCell="BattleshipCell" TCellState="BattleshipCell.CellState" Grid="@GameState.PlayerGrid" Row="10" Col="10" BoardStyle="battleship-board">
+                <Header>
+                    <tr>
+                        <th class="text-center text-light bg-dark" colspan="10">Your Board</th>
+                    </tr>
+                </Header>
+                <Cell Context="cell">
+                    @{
+                        string ship = cell.IsShip ? $"ship {cell.ShipType}" : "";
+                    }
+                    <td class="cell @ship">
+                        @if (@cell.IsDestroyed)
+                        {
+                            <i class="bi bi-x-lg destroyed"></i>
+                        }
+                        else if (@cell.IsDamaged)
+                        {
+                            <i class="bi bi-fire damaged"></i>
+                        }
+                    </td>
+                </Cell>
+            </GameboardComponent>
+        </div>
+        <div class="col mx-3">
+            <GameboardComponent TCell="BattleshipCell" TCellState="BattleshipCell.CellState" Grid="@GameState.OpponentGrid" Row="10" Col="10" BoardStyle="battleship-board">
+                <Header>
+                    <tr>
+                        <th class="text-center text-light @(GameState.IsPlayerTurn ? "red" : "bg-dark")" colspan="10">@(GameState.IsPlayerTurn ? "Attack Your Opponent" : "Opponent's Board")</th>
+                    </tr>
+                </Header>
+                <Cell Context="cell">
+                    @{
+                        string cellClickable = GameState.IsPlayerTurn && GameState.CanClick && cell.IsAttackable ? "cell-clickable" : "";
+                        string ship = cell.IsShip ? $"ship {cell.ShipType}" : "";
+                    }
+                    <td class="cell @cellClickable @ship" @onclick="async () => await OnClick.InvokeAsync((cell.Row, cell.Col))">
+                        @if (cell.IsDestroyed)
+                        {
+                            <i class="bi bi-x-lg destroyed"></i>
+                        }
+                        else if (cell.IsDamaged)
+                        {
+                            <i class="bi bi-fire damaged"></i>
+                        }
+                        else
+                        {
+                            <div class="dot @(cell.IsAttackable ? "gray" : "bg-dark")"></div>
+                        }
+                    </td>
+                </Cell>
+            </GameboardComponent>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required EventCallback<(int, int)> OnClick { get; set; }
+}

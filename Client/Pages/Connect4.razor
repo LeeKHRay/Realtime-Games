@@ -1,0 +1,80 @@
+﻿@page "/games/connect4"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.SignalR.Client
+@using Newtonsoft.Json
+
+@inject HttpClient HttpClient
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IPlayerState PlayerState
+@inject IConnect4GameState GameState
+@inject IGameHubConnection<IConnect4GameState> GameHubConnection
+@implements IAsyncDisposable
+@attribute [Authorize]
+
+<PageTitle>Connect 4</PageTitle>
+
+@if (!GameHubConnection.IsConnected)
+{
+    <h4 class="text-center">Loading...</h4>
+}
+else
+{
+    <GamePageTemplate 
+        GameState="@GameState" 
+        GameName="Connect 4" 
+        WaitPlayer="@GameHubConnection.WaitPlayer" 
+        CancelWaiting="@GameHubConnection.CancelWaiting"
+        QuitGame="@GameHubConnection.QuitGame"
+    >
+        <Connect4Gameboard OnClick="@PutChecker" />
+    </GamePageTemplate>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        string gameName = GameState.GameName;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        string playerName = authState.User.Identity!.Name!;
+
+        PlayerState.Player = await HttpClient.GetFromJsonAsync<Player>($"{Navigation.BaseUri}api/users/{playerName}");
+
+        GameHubConnection.CreateConnection(gameName, playerName, () => InvokeAsync(StateHasChanged));
+
+        GameHubConnection.On<int, int>("PutChecker", async (row, col) =>
+        {
+            GameState.PutChecker(row, col);
+            await InvokeAsync(StateHasChanged);
+
+            // increment player score if win
+            if (GameState.IsWin())
+            {
+                PlayerState.Player!.Score[gameName]++;
+                await HttpClient.PatchAsJsonAsync($"{Navigation.BaseUri}api/users/{PlayerState.Player.Name}", PlayerState.Player.Score);
+            }
+
+        });
+
+        await GameHubConnection.StartAsync();
+    }
+
+    private async Task PutChecker(int col)
+    {
+        if (GameHubConnection.IsConnected && GameState.IsPlayerTurn)
+        {
+            int row = GameState.FindLowestEmptyCell(col);
+            if (row != -1)
+            {
+                await GameHubConnection.SendAsync("PutChecker", row, col, PlayerState.RoomId);
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        PlayerState.Reset();
+        await GameHubConnection.CloseConnection();
+    }
+}

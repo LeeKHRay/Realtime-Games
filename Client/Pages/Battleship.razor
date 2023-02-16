@@ -1,0 +1,99 @@
+﻿@page "/games/battleship"
+
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.AspNetCore.Authorization
+@using Newtonsoft.Json
+
+@inject HttpClient HttpClient
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IPlayerState PlayerState
+@inject IBattleshipGameState GameState
+@inject IGameHubConnection<IBattleshipGameState> GameHubConnection
+@implements IAsyncDisposable
+@attribute [Authorize]
+
+<PageTitle>Battleship</PageTitle>
+
+@if (!GameHubConnection.IsConnected)
+{
+    <h4 class="text-center">Loading...</h4>
+}
+else 
+{
+    <GamePageTemplate 
+        GameState="@GameState" 
+        GameName="Battleship"
+        WaitPlayer="@GameHubConnection.WaitPlayer"
+        CancelWaiting="@GameHubConnection.CancelWaiting"
+        QuitGame="@GameHubConnection.QuitGame"
+    >
+        <BattleshipGameboard OnClick="@AttackShip" />
+    </GamePageTemplate>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        string gameName = GameState.GameName;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        string playerName = authState.User.Identity!.Name!;
+
+        PlayerState.Player = await HttpClient.GetFromJsonAsync<Player>($"{Navigation.BaseUri}api/users/{playerName}");
+
+        GameHubConnection.CreateConnection(gameName, playerName, () => InvokeAsync(StateHasChanged));
+
+        GameHubConnection.On<int, int>("AttackShip", async (row, col) =>
+        {
+            var updatedCells = GameState.DamageShip(row, col);
+
+            await InvokeAsync(StateHasChanged);
+
+            // increment player score if win
+            if (GameState.IsWin())
+            {
+                PlayerState.Player!.Score[gameName]++;
+                await HttpClient.PatchAsJsonAsync($"{Navigation.BaseUri}api/users/{PlayerState.Player.Name}", PlayerState.Player.Score);
+            }
+
+            await GameHubConnection.SendAsync("SendAttackResult", JsonConvert.SerializeObject(updatedCells), PlayerState.Opponent!.Name);
+        });
+
+        GameHubConnection.On<string>("ReceiveAttackResult", async (updatedCells) =>
+        {
+            GameState.UpdateOpponentBoard(JsonConvert.DeserializeObject<List<BattleshipCell>>(updatedCells)!);
+
+            await InvokeAsync(StateHasChanged);
+
+            // increment player score if win
+            if (GameState.IsWin())
+            {
+                PlayerState.Player!.Score[gameName]++;
+                await HttpClient.PatchAsJsonAsync($"{Navigation.BaseUri}api/users/{PlayerState.Player.Name}", PlayerState.Player.Score);
+            }
+
+        });
+
+        await GameHubConnection.StartAsync();
+    }
+
+    private async Task AttackShip((int, int) pos)
+    {
+        if (GameHubConnection.IsConnected && GameState.IsPlayerTurn)
+        {
+            (int row, int col) = pos;
+            if (GameState.CanAttackCell(row, col))
+            {
+                GameState.CanClick = false;
+                await GameHubConnection.SendAsync("AttackShip", row, col, PlayerState.Opponent!.Name);
+            }
+        }
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        PlayerState.Reset();
+        await GameHubConnection.CloseConnection();
+    }
+}

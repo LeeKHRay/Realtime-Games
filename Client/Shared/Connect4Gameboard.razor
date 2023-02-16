@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@inject IConnect4GameState GameState
+
+<div class="container">
+    <GameboardComponent TCell="Connect4Cell" TCellState="Connect4Cell.CellState" Grid="@GameState.Grid" Row="6" Col="7" BoardStyle="connect4-board">
+        <Cell Context="cell">
+            <td class="p-2">
+                <div class="cell @(GameState.IsPlayerTurn ? "cell-clickable" : "") @cell.Color" @onclick="async () => await OnClick.InvokeAsync(cell.Col)"></div>
+            </td>
+        </Cell>
+    </GameboardComponent>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required EventCallback<int> OnClick { get; set; }
+}

@@ -1,0 +1,71 @@
+﻿@inject IPlayerState PlayerState
+
+@if (PlayerState.IsJoinedGame)
+{
+    <PlayersStatus GameState="GameState" />
+    @ChildContent
+    if (GameState.GameResult != GameResult.NotEnd)
+    {
+        string title;
+        if (GameState.GameResult == GameResult.Player1Win)
+        {
+            title = GameState.Players[0].Name + " Win!";
+        }
+        else if (GameState.GameResult == GameResult.Player2Win)
+        {
+            title = GameState.Players[1].Name + " Win!";
+        }
+        else
+        {
+            title = "Draw";
+        }
+        <Dialog Title="@title">
+            <button class="btn btn-success mx-auto" @onclick="@QuitGame">Quit</button>
+        </Dialog>
+    }
+}
+else
+{
+    <div class="container game-page-container border border-1 border-primary rounded">
+        <h1 class="text-center">@GameName</h1>
+        <div class="row">
+            <div class="col-auto">
+                <img class="border border-2 border-dark rounded" src="@($"img/{GameState.GameName}.png")" width="200" height="200" alt="@GameName" />
+            </div>
+            <div class="col d-flex">
+                <button class="btn btn-success m-auto" @onclick="@WaitPlayer">Join Game</button>
+            </div>
+        </div>
+        <div class="row mt-1">
+            <div class="col">
+                <Leaderboard GameName="@GameState.GameName" />
+            </div>
+        </div>
+        @if (PlayerState.IsWaitingPlayer)
+        {
+            <Dialog Title="Waiting for another player to join the game">
+                <button class="btn btn-success mx-auto" @onclick="@CancelWaiting">Cancel</button>
+            </Dialog>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required IGameState GameState { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string GameName { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EventCallback WaitPlayer { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EventCallback CancelWaiting { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EventCallback QuitGame { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+}
