@@ -15,7 +15,8 @@
             <div class="form-floating mb-3">
                 <input asp-for="Input.UserName" class="form-control" autocomplete="username" aria-required="true" placeholder="username" />
                 <label asp-for="Input.UserName"></label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                <small class="d-block form-text text-muted">Username must be 6-20 characters long.</small>
+                <span asp-validation-for="Input.UserName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true" placeholder="name@example.com" />
